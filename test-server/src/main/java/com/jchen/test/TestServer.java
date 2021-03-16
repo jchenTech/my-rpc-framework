@@ -1,6 +1,8 @@
 package com.jchen.test;
 
 import com.jchen.rpc.api.HelloService;
+import com.jchen.rpc.registry.DefaultServiceRegistry;
+import com.jchen.rpc.registry.ServiceRegistry;
 import com.jchen.rpc.server.RpcServer;
 
 /**
@@ -12,7 +14,9 @@ import com.jchen.rpc.server.RpcServer;
 public class TestServer {
     public static void main(String[] args) {
         HelloService helloService = new HelloServiceImpl();
-        RpcServer rpcServer = new RpcServer();
-        rpcServer.register(helloService, 9000);
+        ServiceRegistry serviceRegistry = new DefaultServiceRegistry();
+        serviceRegistry.register(helloService);
+        RpcServer rpcServer = new RpcServer(serviceRegistry);
+        rpcServer.start(9000);
     }
 }
