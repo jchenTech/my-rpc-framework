@@ -13,9 +13,10 @@ import java.io.Serializable;
  * @Date: 2021/03/15/13:18
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class RpcRequest implements Serializable {
+
+    public RpcRequest() {}
 
     //待调用接口名
     private String interfaceName;

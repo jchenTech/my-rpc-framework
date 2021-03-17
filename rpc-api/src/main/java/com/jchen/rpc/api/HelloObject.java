@@ -2,6 +2,7 @@ package com.jchen.rpc.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -11,6 +12,7 @@ import java.io.Serializable;
  * @Date: 2021/03/15/13:08
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class HelloObject implements Serializable {
     private Integer id;

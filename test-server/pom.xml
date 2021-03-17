@@ -14,14 +14,12 @@
         <dependency>
             <groupId>com.jchen</groupId>
             <artifactId>rpc-api</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jchen</groupId>
             <artifactId>rpc-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
