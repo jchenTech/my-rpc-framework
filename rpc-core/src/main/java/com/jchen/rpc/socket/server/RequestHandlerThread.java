@@ -4,12 +4,15 @@ import com.jchen.rpc.entity.RpcRequest;
 import com.jchen.rpc.entity.RpcResponse;
 import com.jchen.rpc.registry.ServiceRegistry;
 import com.jchen.rpc.RequestHandler;
+import com.jchen.rpc.serializer.CommonSerializer;
+import com.jchen.rpc.socket.util.ObjectReader;
+import com.jchen.rpc.socket.util.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 /**
@@ -25,11 +28,14 @@ public class RequestHandlerThread implements Runnable {
     private Socket socket;
     private RequestHandler requestHandler;
     private ServiceRegistry serviceRegistry;
+    private CommonSerializer serializer;
 
-    public RequestHandlerThread(Socket socket, RequestHandler requestHandler, ServiceRegistry serviceRegistry) {
+    public RequestHandlerThread(Socket socket, RequestHandler requestHandler,
+                                ServiceRegistry serviceRegistry, CommonSerializer serializer) {
         this.socket = socket;
         this.requestHandler = requestHandler;
         this.serviceRegistry = serviceRegistry;
+        this.serializer = serializer;
     }
 
     /**
@@ -37,19 +43,20 @@ public class RequestHandlerThread implements Runnable {
      */
     @Override
     public void run() {
-        try (ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-             ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream())) {
-            RpcRequest rpcRequest = (RpcRequest) objectInputStream.readObject();
+        try (InputStream inputStream = socket.getInputStream();
+             OutputStream outputStream = socket.getOutputStream();) {
+             RpcRequest rpcRequest = (RpcRequest) ObjectReader.readObject(inputStream);
 
-            //从RpcRequest对象中获取接口名，通过serviceRegistry获取服务（即实现类）
-            String interfaceName = rpcRequest.getInterfaceName();
-            Object service = serviceRegistry.getService(interfaceName);
+             //从RpcRequest对象中获取接口名，通过serviceRegistry获取服务（即实现类）
+             String interfaceName = rpcRequest.getInterfaceName();
+             Object service = serviceRegistry.getService(interfaceName);
 
-            //调用requestHandler获得执行结果，得到RpcResponse对象写入输出流
-            Object result = requestHandler.handle(rpcRequest, service);
-            objectOutputStream.writeObject(RpcResponse.success(result));
-            objectOutputStream.flush();
-        } catch (IOException | ClassNotFoundException e) {
+             //调用requestHandler获得执行结果，得到RpcResponse对象写入输出流
+             Object result = requestHandler.handle(rpcRequest, service);
+
+             RpcResponse<Object> response = RpcResponse.success(result);
+             ObjectWriter.writeObject(outputStream, response, serializer);
+        } catch (IOException e) {
             logger.error("调用或发送时有错误发生：", e);
         }
     }

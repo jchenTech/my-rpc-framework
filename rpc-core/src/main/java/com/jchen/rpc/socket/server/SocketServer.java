@@ -3,6 +3,7 @@ package com.jchen.rpc.socket.server;
 import com.jchen.rpc.RpcServer;
 import com.jchen.rpc.registry.ServiceRegistry;
 import com.jchen.rpc.RequestHandler;
+import com.jchen.rpc.serializer.CommonSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ public class SocketServer implements RpcServer {
     private final ExecutorService threadPool;
     private RequestHandler requestHandler = new RequestHandler();
     private final ServiceRegistry serviceRegistry;
+    private CommonSerializer serializer;
 
     //创建线程池，传入一个已经注册好服务的ServiceRegistry
     public SocketServer(ServiceRegistry serviceRegistry) {
@@ -45,11 +47,16 @@ public class SocketServer implements RpcServer {
             Socket socket;
             while((socket = serverSocket.accept()) != null) {
                 logger.info("消费者连接: {}:{}", socket.getInetAddress(), socket.getPort());
-                threadPool.execute(new RequestHandlerThread(socket, requestHandler, serviceRegistry));
+                threadPool.execute(new RequestHandlerThread(socket, requestHandler, serviceRegistry, serializer));
             }
             threadPool.shutdown();
         } catch (IOException e) {
             logger.error("服务器启动时有错误发生:", e);
         }
+    }
+
+    @Override
+    public void setSerializer(CommonSerializer serializer) {
+        this.serializer = serializer;
     }
 }

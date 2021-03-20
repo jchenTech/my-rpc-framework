@@ -1,5 +1,7 @@
 package com.jchen.rpc;
 
+import com.jchen.rpc.serializer.CommonSerializer;
+
 /**
  * 服务器类通用接口
  *
@@ -8,4 +10,6 @@ package com.jchen.rpc;
  */
 public interface RpcServer {
     void start(int port);
+
+    void setSerializer(CommonSerializer serializer);
 }

@@ -3,6 +3,7 @@ package com.jchen.test;
 import com.jchen.rpc.api.HelloService;
 import com.jchen.rpc.registry.DefaultServiceRegistry;
 import com.jchen.rpc.registry.ServiceRegistry;
+import com.jchen.rpc.serializer.HessianSerializer;
 import com.jchen.rpc.socket.server.SocketServer;
 
 /**
@@ -17,6 +18,7 @@ public class SocketTestServer {
         ServiceRegistry serviceRegistry = new DefaultServiceRegistry();
         serviceRegistry.register(helloService);
         SocketServer socketServer = new SocketServer(serviceRegistry);
+        socketServer.setSerializer(new HessianSerializer());
         socketServer.start(9000);
     }
 }

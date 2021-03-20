@@ -4,6 +4,7 @@ import com.jchen.rpc.api.HelloService;
 import com.jchen.rpc.netty.server.NettyServer;
 import com.jchen.rpc.registry.DefaultServiceRegistry;
 import com.jchen.rpc.registry.ServiceRegistry;
+import com.jchen.rpc.serializer.HessianSerializer;
 
 /**
  * @Auther: jchen
@@ -15,6 +16,7 @@ public class NettyTestServer {
         ServiceRegistry registry = new DefaultServiceRegistry();
         registry.register(helloService);
         NettyServer server = new NettyServer();
+        server.setSerializer(new HessianSerializer());
         server.start(9999);
     }
 }

@@ -1,6 +1,7 @@
 package com.jchen.rpc;
 
 import com.jchen.rpc.entity.RpcRequest;
+import com.jchen.rpc.serializer.CommonSerializer;
 
 /**
  * 客户端类通用接口
@@ -10,4 +11,6 @@ import com.jchen.rpc.entity.RpcRequest;
  */
 public interface RpcClient {
     Object sendRequest(RpcRequest rpcRequest);
+
+    void setSerializer(CommonSerializer serializer);
 }
