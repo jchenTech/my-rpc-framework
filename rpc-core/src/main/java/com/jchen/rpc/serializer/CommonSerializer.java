@@ -7,11 +7,6 @@ package com.jchen.rpc.serializer;
  * @Date: 2021/03/17/10:58
  */
 public interface CommonSerializer {
-    byte[] serialize(Object obj);
-
-    Object deserialize(byte[] bytes, Class<?> clazz);
-
-    int getCode();
 
     static CommonSerializer getByCode(int code) {
         switch (code) {
@@ -25,4 +20,10 @@ public interface CommonSerializer {
                 return null;
         }
     }
+
+    byte[] serialize(Object obj);
+
+    Object deserialize(byte[] bytes, Class<?> clazz);
+
+    int getCode();
 }

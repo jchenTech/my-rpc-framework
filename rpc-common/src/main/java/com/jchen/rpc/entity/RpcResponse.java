@@ -24,6 +24,10 @@ public class RpcResponse<T> implements Serializable {
     //响应数据
     private T data;
 
+    public RpcResponse() {
+
+    }
+
     /**
      * 生成远程调用成功的响应对象
      */

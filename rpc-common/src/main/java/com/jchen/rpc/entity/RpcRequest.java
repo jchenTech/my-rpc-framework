@@ -16,8 +16,6 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class RpcRequest implements Serializable {
 
-    public RpcRequest() {}
-
     //待调用接口名
     private String interfaceName;
 
@@ -29,4 +27,8 @@ public class RpcRequest implements Serializable {
 
     //待调用方法参数类型
     private Class<?>[] paramTypes;
+
+    public RpcRequest() {
+
+    }
 }
