@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 消费者向提供者发送的请求对象：对象属性包括：待调用接口名；待调用方法名；待调用方法参数值；待调用方法参数类型
+ * 消费者向提供者发送的请求对象
  *
  * @Auther: jchen
  * @Date: 2021/03/15/13:18
@@ -15,6 +15,9 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 public class RpcRequest implements Serializable {
+
+    //请求号
+    private String requestId;
 
     //待调用接口名
     private String interfaceName;

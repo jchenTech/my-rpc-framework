@@ -9,6 +9,7 @@ import com.jchen.rpc.exception.RpcException;
 import com.jchen.rpc.serializer.CommonSerializer;
 import com.jchen.rpc.socket.util.ObjectReader;
 import com.jchen.rpc.socket.util.ObjectWriter;
+import com.jchen.rpc.util.RpcMessageChecker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +38,6 @@ public class SocketClient implements RpcClient {
     public Object sendRequest(RpcRequest rpcRequest) {
         try {
             Socket socket = new Socket(host, port);
-//            ObjectOutputStream objectOutputStream = new ObjectOutputStream(socket.getOutputStream());
-//            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-//            objectOutputStream.writeObject(rpcRequest);
-//            objectOutputStream.flush();
-//            return objectInputStream.readObject();
             OutputStream outputStream = socket.getOutputStream();
             InputStream inputStream = socket.getInputStream();
             ObjectWriter.writeObject(outputStream, rpcRequest, serializer);
@@ -56,6 +52,7 @@ public class SocketClient implements RpcClient {
                 logger.error("调用服务失败, service: {}, response:{}", rpcRequest.getInterfaceName(), rpcResponse);
                 throw new RpcException(RpcError.SERVICE_INVOCATION_FAILURE, " service:" + rpcRequest.getInterfaceName());
             }
+            RpcMessageChecker.check(rpcRequest, rpcResponse);
             return rpcResponse.getData();
         } catch (IOException e) {
             logger.error("调用时有错误发生：", e);
