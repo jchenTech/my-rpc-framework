@@ -6,6 +6,7 @@ import com.jchen.rpc.api.HelloService;
 import com.jchen.rpc.RpcClientProxy;
 import com.jchen.rpc.netty.client.NettyClient;
 import com.jchen.rpc.serializer.HessianSerializer;
+import com.jchen.rpc.serializer.ProtobufSerializer;
 
 /**
  * 测试用Netty消费者
@@ -16,7 +17,7 @@ import com.jchen.rpc.serializer.HessianSerializer;
 public class NettyTestClient {
     public static void main(String[] args) {
         RpcClient client = new NettyClient("127.0.0.1", 9999);
-        client.setSerializer(new HessianSerializer());
+        client.setSerializer(new ProtobufSerializer());
         RpcClientProxy rpcClientProxy = new RpcClientProxy(client);
         HelloService helloService = rpcClientProxy.getProxy(HelloService.class);
         HelloObject object = new HelloObject(12, "This is a message");

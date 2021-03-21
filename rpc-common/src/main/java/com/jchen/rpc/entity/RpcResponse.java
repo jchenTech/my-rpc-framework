@@ -13,6 +13,7 @@ import java.io.Serializable;
  * @Date: 2021/03/15/13:20
  */
 @Data
+@NoArgsConstructor
 public class RpcResponse<T> implements Serializable {
 
     //响应对应的请求号
@@ -27,9 +28,6 @@ public class RpcResponse<T> implements Serializable {
     //响应数据
     private T data;
 
-    public RpcResponse() {
-
-    }
 
     /**
      * 生成远程调用成功的响应对象

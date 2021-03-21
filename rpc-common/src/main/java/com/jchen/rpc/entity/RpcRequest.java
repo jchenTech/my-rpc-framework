@@ -13,6 +13,7 @@ import java.io.Serializable;
  * @Date: 2021/03/15/13:18
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class RpcRequest implements Serializable {
 
@@ -31,7 +32,4 @@ public class RpcRequest implements Serializable {
     //待调用方法参数类型
     private Class<?>[] paramTypes;
 
-    public RpcRequest() {
-
-    }
 }
