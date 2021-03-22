@@ -1,4 +1,4 @@
-package com.jchen.rpc.netty.client;
+package com.jchen.rpc.transport.netty.client;
 
 import com.jchen.rpc.codec.CommonDecoder;
 import com.jchen.rpc.codec.CommonEncoder;

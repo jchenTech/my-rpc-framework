@@ -1,4 +1,4 @@
-package com.jchen.rpc;
+package com.jchen.rpc.transport;
 
 import com.jchen.rpc.entity.RpcRequest;
 import org.slf4j.Logger;

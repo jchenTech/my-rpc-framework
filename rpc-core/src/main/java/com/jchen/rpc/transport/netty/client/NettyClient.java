@@ -1,8 +1,8 @@
-package com.jchen.rpc.netty.client;
+package com.jchen.rpc.transport.netty.client;
 
-import com.jchen.rpc.RpcClient;
-import com.jchen.rpc.codec.CommonDecoder;
-import com.jchen.rpc.codec.CommonEncoder;
+import com.jchen.rpc.registry.NacosServiceRegistry;
+import com.jchen.rpc.registry.ServiceRegistry;
+import com.jchen.rpc.transport.RpcClient;
 import com.jchen.rpc.entity.RpcRequest;
 import com.jchen.rpc.entity.RpcResponse;
 import com.jchen.rpc.enumeration.RpcError;
@@ -12,7 +12,6 @@ import com.jchen.rpc.util.RpcMessageChecker;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import org.slf4j.Logger;
@@ -31,6 +30,7 @@ public class NettyClient implements RpcClient {
 
     private static final Bootstrap bootstrap;
     private CommonSerializer serializer;
+    private final ServiceRegistry serviceRegistry;
 
     static {
         EventLoopGroup group = new NioEventLoopGroup();
@@ -40,12 +40,9 @@ public class NettyClient implements RpcClient {
                 .option(ChannelOption.SO_KEEPALIVE, true);
     }
 
-    private String host;
-    private int port;
 
-    public NettyClient(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public NettyClient() {
+        this.serviceRegistry = new NacosServiceRegistry();
     }
 
     @Override
@@ -58,7 +55,8 @@ public class NettyClient implements RpcClient {
         //多个线程试图改变同一个AtomicReference(例如比较和交换操作)将不会使得AtomicReference处于不一致的状态。
         AtomicReference<Object> result = new AtomicReference<>(null);
         try {
-            Channel channel = ChannelProvider.get(new InetSocketAddress(host, port), serializer);
+            InetSocketAddress inetSocketAddress = serviceRegistry.lookupService(rpcRequest.getInterfaceName());
+            Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
             if (channel.isActive()) {
                 channel.writeAndFlush(rpcRequest).addListener(future1 -> {
                     if (future1.isSuccess()) {

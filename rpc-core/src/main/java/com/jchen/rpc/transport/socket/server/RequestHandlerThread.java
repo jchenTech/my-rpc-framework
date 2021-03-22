@@ -1,12 +1,12 @@
-package com.jchen.rpc.socket.server;
+package com.jchen.rpc.transport.socket.server;
 
 import com.jchen.rpc.entity.RpcRequest;
 import com.jchen.rpc.entity.RpcResponse;
 import com.jchen.rpc.registry.ServiceRegistry;
-import com.jchen.rpc.RequestHandler;
+import com.jchen.rpc.handler.RequestHandler;
 import com.jchen.rpc.serializer.CommonSerializer;
-import com.jchen.rpc.socket.util.ObjectReader;
-import com.jchen.rpc.socket.util.ObjectWriter;
+import com.jchen.rpc.transport.socket.util.ObjectReader;
+import com.jchen.rpc.transport.socket.util.ObjectWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,12 +47,8 @@ public class RequestHandlerThread implements Runnable {
              OutputStream outputStream = socket.getOutputStream();) {
              RpcRequest rpcRequest = (RpcRequest) ObjectReader.readObject(inputStream);
 
-             //从RpcRequest对象中获取接口名，通过serviceRegistry获取服务（即实现类）
              String interfaceName = rpcRequest.getInterfaceName();
-             Object service = serviceRegistry.getService(interfaceName);
-
-             //调用requestHandler获得执行结果，得到RpcResponse对象写入输出流
-             Object result = requestHandler.handle(rpcRequest, service);
+             Object result = requestHandler.handle(rpcRequest);
 
              RpcResponse<Object> response = RpcResponse.success(result, rpcRequest.getRequestId());
              ObjectWriter.writeObject(outputStream, response, serializer);

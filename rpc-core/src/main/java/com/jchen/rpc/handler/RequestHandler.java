@@ -1,8 +1,10 @@
-package com.jchen.rpc;
+package com.jchen.rpc.handler;
 
 import com.jchen.rpc.entity.RpcRequest;
 import com.jchen.rpc.entity.RpcResponse;
 import com.jchen.rpc.enumeration.ResponseCode;
+import com.jchen.rpc.provider.ServiceProvider;
+import com.jchen.rpc.provider.ServiceProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,15 +19,20 @@ import java.lang.reflect.Method;
  */
 public class RequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(RequestHandler.class);
+    private static final ServiceProvider serviceProvider;
+
+    static {
+        serviceProvider = new ServiceProviderImpl();
+    }
 
     /**
-     * 通过输入的rpcRequest对象和对应的实现类，返回执行结果
+     * 通过输入的rpcRequest对象，返回执行结果
      * @param rpcRequest 客户端发送的rpcRequest对象
-     * @param service 服务端的实现类
      * @return 执行结果
      */
-    public Object handle(RpcRequest rpcRequest, Object service) {
+    public Object handle(RpcRequest rpcRequest) {
         Object result = null;
+        Object service = serviceProvider.getServiceProvider(rpcRequest.getInterfaceName());
         try {
             result = invokeTargetMethod(rpcRequest, service);
             logger.info("服务:{} 成功调用方法:{}", rpcRequest.getInterfaceName(), rpcRequest.getMethodName());

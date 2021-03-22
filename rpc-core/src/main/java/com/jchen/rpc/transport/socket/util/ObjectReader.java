@@ -1,4 +1,4 @@
-package com.jchen.rpc.socket.util;
+package com.jchen.rpc.transport.socket.util;
 
 import com.jchen.rpc.entity.RpcRequest;
 import com.jchen.rpc.entity.RpcResponse;
