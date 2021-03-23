@@ -9,9 +9,10 @@ import com.jchen.rpc.serializer.CommonSerializer;
  * @Date: 2021/03/17/9:39
  */
 public interface RpcServer {
-    void start();
 
-    void setSerializer(CommonSerializer serializer);
+    int DEFAULT_SERIALIZER = CommonSerializer.KRYO_SERIALIZER;
+
+    void start();
 
     <T> void publishService(T service, Class<T> serviceClass);
 }
