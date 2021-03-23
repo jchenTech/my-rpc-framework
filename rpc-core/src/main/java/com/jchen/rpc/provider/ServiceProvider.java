@@ -7,7 +7,7 @@ package com.jchen.rpc.provider;
  * @Date: 2021/03/22/14:12
  */
 public interface ServiceProvider {
-    <T> void addServiceProvider(T service);
+    <T> void addServiceProvider(T service, Class<T> serviceClass);
 
     Object getServiceProvider(String serviceName);
 }
