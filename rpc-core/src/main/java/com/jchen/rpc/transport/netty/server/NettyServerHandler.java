@@ -2,6 +2,7 @@ package com.jchen.rpc.transport.netty.server;
 
 import com.jchen.rpc.entity.RpcRequest;
 import com.jchen.rpc.entity.RpcResponse;
+import com.jchen.rpc.factory.SingletonFactory;
 import com.jchen.rpc.provider.ServiceProviderImpl;
 import com.jchen.rpc.registry.ServiceRegistry;
 import com.jchen.rpc.handler.RequestHandler;
@@ -22,13 +23,13 @@ import java.util.concurrent.ExecutorService;
 public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyServerHandler.class);
-    private static RequestHandler requestHandler;
     private static final String THREAD_NAME_PREFIX = "netty-server-handler";
-    private static final ExecutorService threadPool;
+    private final ExecutorService threadPool;
+    private final RequestHandler requestHandler;
 
-    static {
-        requestHandler = new RequestHandler();
-        threadPool = ThreadPoolFactory.createDefaultThreadPool(THREAD_NAME_PREFIX);
+    public NettyServerHandler() {
+        this.requestHandler = SingletonFactory.getInstance(RequestHandler.class);
+        this.threadPool = ThreadPoolFactory.createDefaultThreadPool(THREAD_NAME_PREFIX);
     }
 
     /**

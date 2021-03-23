@@ -1,5 +1,6 @@
 package com.jchen.rpc.transport.netty.server;
 
+import com.jchen.rpc.hook.ShutdownHook;
 import com.jchen.rpc.provider.ServiceProvider;
 import com.jchen.rpc.provider.ServiceProviderImpl;
 import com.jchen.rpc.registry.NacosServiceRegistry;
@@ -83,6 +84,7 @@ public class NettyServer implements RpcServer {
                         }
                     });
             ChannelFuture future = serverBootstrap.bind(host, port).sync();
+            ShutdownHook.getShutdownHook().addClearAllHook();
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {

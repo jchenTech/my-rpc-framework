@@ -2,6 +2,7 @@ package com.jchen.rpc.transport.socket.server;
 
 import com.jchen.rpc.enumeration.RpcError;
 import com.jchen.rpc.exception.RpcException;
+import com.jchen.rpc.hook.ShutdownHook;
 import com.jchen.rpc.provider.ServiceProvider;
 import com.jchen.rpc.provider.ServiceProviderImpl;
 import com.jchen.rpc.registry.NacosServiceRegistry;
@@ -61,12 +62,14 @@ public class SocketServer implements RpcServer {
     //启动服务端
     @Override
     public void start() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try (ServerSocket serverSocket = new ServerSocket()) {
+            serverSocket.bind(new InetSocketAddress(host, port));
             logger.info("服务器启动……");
+            ShutdownHook.getShutdownHook().addClearAllHook();
             Socket socket;
             while((socket = serverSocket.accept()) != null) {
                 logger.info("消费者连接: {}:{}", socket.getInetAddress(), socket.getPort());
-                threadPool.execute(new RequestHandlerThread(socket, requestHandler, serviceRegistry, serializer));
+                threadPool.execute(new SocketRequestHandlerThread(socket, requestHandler, serializer));
             }
             threadPool.shutdown();
         } catch (IOException e) {
