@@ -5,6 +5,7 @@ import com.jchen.rpc.provider.ServiceProvider;
 import com.jchen.rpc.provider.ServiceProviderImpl;
 import com.jchen.rpc.registry.NacosServiceRegistry;
 import com.jchen.rpc.registry.ServiceRegistry;
+import com.jchen.rpc.transport.AbstractRpcServer;
 import com.jchen.rpc.transport.RpcServer;
 import com.jchen.rpc.codec.CommonDecoder;
 import com.jchen.rpc.codec.CommonEncoder;
@@ -31,15 +32,7 @@ import java.util.concurrent.TimeUnit;
  * @Auther: jchen
  * @Date: 2021/03/17/10:01
  */
-public class NettyServer implements RpcServer {
-
-    private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
-
-    private final String host;
-    private final int port;
-
-    private final ServiceRegistry serviceRegistry;
-    private final ServiceProvider serviceProvider;
+public class NettyServer extends AbstractRpcServer {
 
     private final CommonSerializer serializer;
 
@@ -53,18 +46,9 @@ public class NettyServer implements RpcServer {
         serviceRegistry = new NacosServiceRegistry();
         serviceProvider = new ServiceProviderImpl();
         this.serializer = CommonSerializer.getByCode(serializer);
+        scanServices();
     }
 
-    @Override
-    public <T> void publishService(T service, Class<T> serviceClass) {
-        if (serializer == null) {
-            logger.error("未设置序列化器");
-            throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
-        }
-        serviceProvider.addServiceProvider(service, serviceClass);
-        serviceRegistry.register(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
-        start();
-    }
 
     @Override
     public void start() {

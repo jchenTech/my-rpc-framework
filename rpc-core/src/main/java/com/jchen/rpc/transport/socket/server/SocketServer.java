@@ -6,6 +6,7 @@ import com.jchen.rpc.hook.ShutdownHook;
 import com.jchen.rpc.provider.ServiceProvider;
 import com.jchen.rpc.provider.ServiceProviderImpl;
 import com.jchen.rpc.registry.NacosServiceRegistry;
+import com.jchen.rpc.transport.AbstractRpcServer;
 import com.jchen.rpc.transport.RpcServer;
 import com.jchen.rpc.registry.ServiceRegistry;
 import com.jchen.rpc.handler.RequestHandler;
@@ -26,20 +27,11 @@ import java.util.concurrent.*;
  * @Auther: jchen
  * @Date: 2021/03/15/20:06
  */
-public class SocketServer implements RpcServer {
-    private static final Logger logger = LoggerFactory.getLogger(SocketServer.class);
+public class SocketServer extends AbstractRpcServer {
 
-
-    private final ExecutorService threadPool;;
-    private final String host;
-    private final int port;
-    private RequestHandler requestHandler = new RequestHandler();
-
+    private final ExecutorService threadPool;
     private final CommonSerializer serializer;
-
-
-    private final ServiceRegistry serviceRegistry;
-    private final ServiceProvider serviceProvider;
+    private RequestHandler requestHandler = new RequestHandler();
 
     public SocketServer(String host, int port) {
         this(host, port, DEFAULT_SERIALIZER);
@@ -52,17 +44,7 @@ public class SocketServer implements RpcServer {
         this.serviceRegistry = new NacosServiceRegistry();
         this.serviceProvider = new ServiceProviderImpl();
         this.serializer = CommonSerializer.getByCode(serializer);
-    }
-
-    @Override
-    public <T> void publishService(T service, Class<T> serviceClass) {
-        if(serializer == null) {
-            logger.error("未设置序列化器");
-            throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
-        }
-        serviceProvider.addServiceProvider(service, serviceClass);
-        serviceRegistry.register(serviceClass.getCanonicalName(), new InetSocketAddress(host, port));
-        start();
+        scanServices();
     }
 
     //启动服务端
