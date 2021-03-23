@@ -29,7 +29,7 @@ public class RpcMessageChecker {
             throw new RpcException(RpcError.SERVICE_INVOCATION_FAILURE, INTERFACE_NAME + ":" + rpcRequest.getInterfaceName());
         }
         //rpcRequest和rpcResponse的请求号不一致
-        if (!rpcRequest.getRequestId().equals(rpcResponse.getRquestId())) {
+        if (!rpcRequest.getRequestId().equals(rpcResponse.getRequestId())) {
             throw new RpcException(RpcError.RESPONSE_NOT_MATCH, INTERFACE_NAME + ":" + rpcRequest.getInterfaceName());
         }
         //rpcResponse响应状态码为空或响应状态码不成功
