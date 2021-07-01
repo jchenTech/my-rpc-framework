@@ -68,6 +68,11 @@ public class NettyClient implements RpcClient {
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
     }
 
+    /**
+     * 1.查找对应的服务器地址；2.进行Netty初始化工作，绑定handler，建立连接；3.发送RpcRequest对象；
+     * @param rpcRequest RpcRequest对象
+     * @return
+     */
     @Override
     public CompletableFuture<RpcResponse> sendRequest(RpcRequest rpcRequest) {
         if (serializer == null) {
@@ -76,12 +81,15 @@ public class NettyClient implements RpcClient {
         }
         CompletableFuture<RpcResponse> resultFuture = new CompletableFuture<>();
         try {
+            //1.查找能够提供服务的服务器地址
             InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
+            //2.进行Netty初始化，channel绑定编解码器和读取返回结果的handler，建立与服务器的连接
             Channel channel = ChannelProvider.get(inetSocketAddress, serializer);
             if (channel.isActive()) {
                 group.shutdownGracefully();
                 return null;
             }
+            //3.发送RpcRequest对象
             unprocessedRequests.put(rpcRequest.getRequestId(), resultFuture);
             channel.writeAndFlush(rpcRequest).addListener((ChannelFutureListener) future1 -> {
                 if (future1.isSuccess()) {

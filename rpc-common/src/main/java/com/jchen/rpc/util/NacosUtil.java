@@ -16,7 +16,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 管理Nacos连接等工具类
+ * 管理Nacos连接等工具类：
+ * 1.registerService供服务端调用，注册服务；
+ * 2.getAllInstance供客户端调用，查找服务对应服务器地址列表；
+ * 3.clearRegistry用于注销服务
  *
  * @Auther: jchen
  * @Date: 2021/03/22/15:48
@@ -44,16 +47,31 @@ public class NacosUtil {
         }
     }
 
+    /**
+     * 注册服务功能，供服务端调用
+     * @param serviceName 服务名
+     * @param address 服务端地址
+     * @throws NacosException
+     */
     public static void registerService(String serviceName, InetSocketAddress address) throws NacosException {
         namingService.registerInstance(serviceName, address.getHostName(), address.getPort());
         NacosUtil.address = address;
         serviceNames.add(serviceName);
     }
 
+    /**
+     * 根据服务名，获取所有服务器列表，供客户端调用
+     * @param serviceName 服务名
+     * @return 对应的服务器列表list
+     * @throws NacosException
+     */
     public static List<Instance> getAllInstance(String serviceName) throws NacosException {
         return namingService.getAllInstances(serviceName);
     }
 
+    /**
+     * 清除注册信息，注销对应服务器的服务
+     */
     public static void clearRegistry() {
         if (!serviceNames.isEmpty() && address != null) {
             String host = address.getHostName();

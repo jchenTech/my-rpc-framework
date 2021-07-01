@@ -15,7 +15,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * Kryo序列化
+ * Kryo序列化，基于字节的，对空间利用率较高，在网络传输时可以减小体积
+ * 相比于JSON，序列化时记录了属性对象的类型信息，无需传入class或type类信息辅助序列化
  *
  * @Auther: jchen
  * @Date: 2021/03/18/13:24
@@ -26,7 +27,7 @@ public class KryoSerializer implements CommonSerializer {
 
     private static final ThreadLocal<Kryo> kryoThreadLocal = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
-        kryo.register(RpcResponse.class);
+        kryo.register(RpcResponse.class);//注册类的全限定名，序列化时用一个id来代替全限定名
         kryo.register(RpcRequest.class);
         kryo.setReferences(true);//打开循环引用的支持，防止栈内存溢出
         kryo.setRegistrationRequired(false);//禁止类注册

@@ -25,6 +25,9 @@ public class CommonEncoder extends MessageToByteEncoder {
         this.serializer = serializer;
     }
 
+    /**
+     * 编码器，根据MRF协议，封装成协议包
+     */
     @Override
     protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
         //1.写入协议包标识
@@ -40,7 +43,7 @@ public class CommonEncoder extends MessageToByteEncoder {
         //4.写入序列化后的数据长度
         byte[] bytes = serializer.serialize(msg);
         out.writeInt(bytes.length);
-        //4.写入序列化后的数据
+        //5.写入序列化后的数据
         out.writeBytes(bytes);
     }
 

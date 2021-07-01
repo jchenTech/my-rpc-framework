@@ -24,10 +24,15 @@ public class ShutdownHook {
         return shutdownHook;
     }
 
+    /**
+     * 当JVM关闭时，会执行自动注销服务任务
+     */
     public void addClearAllHook() {
         logger.info("关闭后将自动注销所有服务");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            //注销对应服务器的服务
             NacosUtil.clearRegistry();
+            //关闭线程池
             ThreadPoolFactory.shutDownAll();
         }));
     }

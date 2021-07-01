@@ -53,10 +53,13 @@ public class SocketServer extends AbstractRpcServer {
         try (ServerSocket serverSocket = new ServerSocket()) {
             serverSocket.bind(new InetSocketAddress(host, port));
             logger.info("服务器启动……");
+            //添加自动注销服务的钩子，在服务端关闭时，将自动注销服务
             ShutdownHook.getShutdownHook().addClearAllHook();
             Socket socket;
+            //监听到消费者连接
             while((socket = serverSocket.accept()) != null) {
                 logger.info("消费者连接: {}:{}", socket.getInetAddress(), socket.getPort());
+                //创建工作线程，处理rpcRequest对象，获取对应服务，将执行结果写入rpcResponse写入输出流中供客户端读取
                 threadPool.execute(new SocketRequestHandlerThread(socket, requestHandler, serializer));
             }
             threadPool.shutdown();

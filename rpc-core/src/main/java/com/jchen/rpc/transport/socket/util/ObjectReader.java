@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * 为了Socket方式也能够使用多种序列化器，创建一个通用接口
+ * 为了Socket方式也能够使用多种序列化器，创建一个通用类
  * Socket方式从输入流中读取字节并反序列化
  *
  * @Auther: jchen
@@ -23,7 +23,14 @@ public class ObjectReader {
     private static final Logger logger = LoggerFactory.getLogger(ObjectReader.class);
     private static final int MAGIC_NUMBER = 0xCAFEBABE;
 
+    /**
+     * 根据MRF协议从输入流通过反序列化读取object信息，支持多种序列化器
+     * @param in 输入流
+     * @return 反序列化后的rpcRequest对象或rpcReponse对象
+     * @throws IOException
+     */
     public static Object readObject(InputStream in) throws IOException {
+        //1.MAGIC_NUMBER魔数
         byte[] numberBytes = new byte[4];
         in.read(numberBytes);
         int magic = bytesToInt(numberBytes);
@@ -31,6 +38,7 @@ public class ObjectReader {
             logger.error("不识别的协议包: {}", magic);
             throw new RpcException(RpcError.UNKNOWN_PROTOCOL);
         }
+        //2.Package Type包类型，是请求类型还是相应类型
         in.read(numberBytes);
         int packageCode = bytesToInt(numberBytes);
         Class<?> packageClass;
@@ -42,6 +50,7 @@ public class ObjectReader {
             logger.error("不识别的数据包: {}", packageCode);
             throw new RpcException(RpcError.UNKNOWN_PACKAGE_TYPE);
         }
+        //3.Serializer Type序列化器类型
         in.read(numberBytes);
         int serializerCode = bytesToInt(numberBytes);
         CommonSerializer serializer = CommonSerializer.getByCode(serializerCode);
@@ -49,13 +58,20 @@ public class ObjectReader {
             logger.error("不识别的反序列化器: {}", serializerCode);
             throw new RpcException(RpcError.UNKNOWN_SERIALIZER);
         }
+        //4.Data Length数据字节长度
         in.read(numberBytes);
         int length = bytesToInt(numberBytes);
         byte[] bytes = new byte[length];
+        //5.Data Bytes反序列化后数据内容
         in.read(bytes);
         return serializer.deserialize(bytes, packageClass);
     }
 
+    /**
+     * 将byte[]类型转换为int类型
+     * @param src
+     * @return
+     */
     public static int bytesToInt(byte[] src) {
         int value;
         value = ((src[0] & 0xFF)<<24)

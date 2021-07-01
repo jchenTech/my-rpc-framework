@@ -10,10 +10,13 @@ import com.jchen.rpc.serializer.CommonSerializer;
  */
 public interface RpcServer {
 
+    //序列化器
     int DEFAULT_SERIALIZER = CommonSerializer.KRYO_SERIALIZER;
 
+    //启动方法
     void start();
 
+    //注册服务
     <T> void publishService(T service, String serviceName);
 
 }

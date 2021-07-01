@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 方法调用的响应状态码
+ * 方法调用的响应状态码和状态信息
  *
  * @Auther: jchen
  * @Date: 2021/03/15/16:11

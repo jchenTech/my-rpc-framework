@@ -52,6 +52,7 @@ public class NettyServer extends AbstractRpcServer {
 
     @Override
     public void start() {
+        //添加钩子，服务端关闭时自动注销该部分服务
         ShutdownHook.getShutdownHook().addClearAllHook();
         EventLoopGroup bossGroup = new NioEventLoopGroup();
         EventLoopGroup workerGroup = new NioEventLoopGroup();
@@ -70,18 +71,22 @@ public class NettyServer extends AbstractRpcServer {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
                             ChannelPipeline pipeline = ch.pipeline();
+                            //心跳检查机制，当超过30s没有从Channel中读取到数据时，会触发READER_IDLE的IdleStateEvent事件，触发userEventTrigger()方法
                             pipeline.addLast(new IdleStateHandler(30, 0, 0, TimeUnit.SECONDS))
                             .addLast(new CommonEncoder(serializer))
                             .addLast(new CommonDecoder())
                             .addLast(new NettyServerHandler());
                         }
                     });
+            //绑定端口，启动Netty，sync()表示阻塞主Server线程，以执行Netty线程，如果不阻塞那么马上就被shutdown了
             ChannelFuture future = serverBootstrap.bind(host, port).sync();
+            //等确定通道关闭了，关闭future回到主Server线程
             future.channel().closeFuture().sync();
 
         } catch (InterruptedException e) {
             logger.error("启动服务器时有错误发生: ", e);
         } finally {
+            //优雅关闭Netty服务端并且清理掉内存
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
         }

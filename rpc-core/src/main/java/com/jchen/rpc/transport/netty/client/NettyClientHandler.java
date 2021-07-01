@@ -33,6 +33,12 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RpcResponse>
         this.unprocessedRequests = SingletonFactory.getInstance(UnprocessedRequests.class);
     }
 
+    /**
+     * 读取从服务端返回的结果
+     * @param ctx
+     * @param msg RpcResponse对象
+     * @throws Exception
+     */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcResponse msg) throws Exception {
         try {
@@ -50,8 +56,17 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RpcResponse>
         ctx.close();
     }
 
+    /**
+     * 捕获IdleStateHandler发出的事件进行处理
+     * 当事件为WRITER_IDLE写数据时，即为如果5秒内write()方法未被调用则触发一次userEventTrigger()方法
+     * 向服务器发送心跳包，如果服务端接收代表对方在线，不用关闭channel，如果没有接受，说明服务器可能宕机，断开连接。
+     * @param ctx
+     * @param evt IdleStateHandler中因为超时发出的事件
+     * @throws Exception
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        //当事件为WRITER_IDLE写数据时，向服务器发送RpcRequest对象。
         if (evt instanceof IdleStateEvent) {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.WRITER_IDLE) {
@@ -60,6 +75,7 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<RpcResponse>
                         CommonSerializer.getByCode(CommonSerializer.DEFAULT_SERIALIZER));
                 RpcRequest rpcRequest = new RpcRequest();
                 rpcRequest.setHeartBeat(true);
+                //设置一个Listener监测服务端是否接收到心跳包，如果接收到就代表对方在线，不用关闭Channel
                 channel.writeAndFlush(rpcRequest).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
             }
         } else {

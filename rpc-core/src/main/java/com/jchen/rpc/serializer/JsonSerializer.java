@@ -11,7 +11,8 @@ import com.jchen.rpc.enumeration.SerializerCode;
 import java.io.IOException;
 
 /**
- * 使用JSON格式的序列化器
+ * 使用JSON格式的序列化器，执行序列化和反序列化功能
+ * 注意JSON序列化器在反序列化Object对象时会发生发序列化失败现象！！
  *
  * @Auther: jchen
  * @Date: 2021/03/17/11:04
@@ -47,8 +48,8 @@ public class JsonSerializer implements CommonSerializer {
     }
 
     /*
-        这里由于使用JSON序列化和反序列化Object数组，无法保证反序列化后仍然为原实例类型
-        需要重新判断处理
+        这里由于使用JSON序列化和反序列化Object数组(参数值Object[] parameters;)，无法保证反序列化后仍然为原实例类型，
+        因为在序列化时JSON本质上只是转换成JSON字符串，不会记录对象的类型信息，因此需要ParamTypes来获取对象信息，辅助反序列化。
      */
     private Object handleRequest(Object obj) throws IOException {
         RpcRequest rpcRequest = (RpcRequest) obj;

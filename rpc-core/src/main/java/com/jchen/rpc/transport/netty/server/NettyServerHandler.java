@@ -32,7 +32,8 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
     }
 
     /**
-     * 接受RpcRequest对象，并获得实现类方法后执行，将结果发送出去
+     * 接受RpcRequest对象，调用RequestHandler执行，获得执行结果并将结果发送出去
+     * 在超时时间内如果ChannelRead()方法未被调用，那么将调用userEventTriggered方法
      */
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, RpcRequest msg) throws Exception {
@@ -42,6 +43,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
                 return;
             }
             logger.info("服务器接收到请求: {}", msg);
+            //调用requestHandler查找服务并通过反射调用方法执行
             Object result = requestHandler.handle(msg);
             if (ctx.channel().isActive() && ctx.channel().isWritable()) {
                 ctx.writeAndFlush(RpcResponse.success(result, msg.getRequestId()));
@@ -60,8 +62,16 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<RpcRequest> 
         ctx.close();
     }
 
+    /**
+     * 捕获 IdleStateHandler 发出的事件进行处理
+     * 当事件为 READER_IDLE 读数据时，代表如果30秒内ChannelRead()方法未被调用，则调用userEventTriggered方法断开服务端连接
+     * @param ctx
+     * @param evt IdleStateHandler中因为超时发出的事件
+     * @throws Exception
+     */
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        //当事件为 READER_IDLE 读数据时，服务器断开连接
         if (evt instanceof IdleStateEvent) {
             IdleState state = ((IdleStateEvent) evt).state();
             if (state == IdleState.READER_IDLE) {

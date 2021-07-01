@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ * 随机轮询策略
+ *
  * @Auther: jchen
  * @Date: 2021/03/23/15:53
  */

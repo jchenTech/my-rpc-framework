@@ -51,18 +51,26 @@ public class SocketClient implements RpcClient {
         this.serializer = CommonSerializer.getByCode(serializer);
     }
 
+    /**
+     * 基于Socket的传输方式，通过注册中心查找对应服务所在服务器地址，向服务端发送rpcRequest对象
+     * @param rpcRequest
+     * @return
+     */
     @Override
     public Object sendRequest(RpcRequest rpcRequest) {
         if(serializer == null) {
             logger.error("未设置序列化器");
             throw new RpcException(RpcError.SERIALIZER_NOT_FOUND);
         }
+        //根据接口名在注册中心总查找服务端中的服务，返回提供服务的服务端地址(ip,port)
         InetSocketAddress inetSocketAddress = serviceDiscovery.lookupService(rpcRequest.getInterfaceName());
         try (Socket socket = new Socket()) {
             socket.connect(inetSocketAddress);
             OutputStream outputStream = socket.getOutputStream();
             InputStream inputStream = socket.getInputStream();
+            //为了保证Socket方式支持多种序列化器，通过自定义的类ObjectWriter将rpcRequest写入输出流
             ObjectWriter.writeObject(outputStream, rpcRequest, serializer);
+            //通过自定义的ObjectReader类从输入流中读取rpcResponse响应对象
             Object obj = ObjectReader.readObject(inputStream);
             RpcResponse rpcResponse = (RpcResponse) obj;
             if (rpcResponse == null) {
@@ -73,6 +81,7 @@ public class SocketClient implements RpcClient {
                 logger.error("调用服务失败, service: {}, response:{}", rpcRequest.getInterfaceName(), rpcResponse);
                 throw new RpcException(RpcError.SERVICE_INVOCATION_FAILURE, " service:" + rpcRequest.getInterfaceName());
             }
+            //通过requestId检查响应与请求是否匹配
             RpcMessageChecker.check(rpcRequest, rpcResponse);
             return rpcResponse;
         } catch (IOException e) {

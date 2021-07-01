@@ -5,6 +5,8 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import java.util.List;
 
 /**
+ * 轮询策略
+ *
  * @Auther: jchen
  * @Date: 2021/03/23/15:54
  */

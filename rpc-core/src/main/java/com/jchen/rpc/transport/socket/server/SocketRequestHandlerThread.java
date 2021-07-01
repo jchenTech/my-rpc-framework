@@ -40,10 +40,13 @@ public class SocketRequestHandlerThread implements Runnable {
      */
     @Override
     public void run() {
-        try (InputStream inputStream = socket.getInputStream();
+        try (InputStream inputStream = socket.getInputStream();//这种写法可以在执行完后自动关闭流，不需要手动关闭
              OutputStream outputStream = socket.getOutputStream();) {
+            //读取rpcRequest对象
              RpcRequest rpcRequest = (RpcRequest) ObjectReader.readObject(inputStream);
+             //通过requestHandler通过反射调用方法执行，返回执行结果
              Object result = requestHandler.handle(rpcRequest);
+             //将执行结果封装到RpcResponse对象中，写入输出流，供客户端读取
              RpcResponse<Object> response = RpcResponse.success(result, rpcRequest.getRequestId());
              ObjectWriter.writeObject(outputStream, response, serializer);
         } catch (IOException e) {

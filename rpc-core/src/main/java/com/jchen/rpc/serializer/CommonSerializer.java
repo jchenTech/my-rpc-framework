@@ -1,7 +1,7 @@
 package com.jchen.rpc.serializer;
 
 /**
- * 通用的序列化反序列化接口
+ * 通用的序列化反序列化接口，包含序列化和反序列化数据的功能
  *
  * @Auther: jchen
  * @Date: 2021/03/17/10:58

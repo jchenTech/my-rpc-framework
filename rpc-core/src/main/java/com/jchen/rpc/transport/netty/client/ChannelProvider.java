@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * 用于获取 Channel 对象
+ * 用于获取Channel对象，进行Netty的初始化工作、在pipeline中添加编解码器和自定义handler、建立与服务器的连接
  *
  * @Auther: jchen
  * @Date: 2021/03/21/15:25
@@ -32,6 +32,13 @@ public class ChannelProvider {
 
     private static Map<String, Channel> channels = new ConcurrentHashMap<>();
 
+    /**
+     * channel的一些配置，在pipeline中添加编解码器和自定义handler，建立与服务器的连接
+     * @param inetSocketAddress 连接的服务器地址
+     * @param serializer 序列化器
+     * @return
+     * @throws InterruptedException
+     */
     public static Channel get(InetSocketAddress inetSocketAddress, CommonSerializer serializer) throws InterruptedException {
         String key = inetSocketAddress.toString() + serializer.getCode();
         if (channels.containsKey(key)) {
@@ -42,12 +49,14 @@ public class ChannelProvider {
                 channels.remove(key);
             }
         }
+        //绑定handler
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) {
                 /*自定义序列化编解码器*/
                 // RpcResponse -> ByteBuf
                 ch.pipeline().addLast(new CommonEncoder(serializer))
+                        //心跳检查机制，当5s内没有写入数据到channel中时，会触发WRITER_IDLE的IdleStateEvent事件，触发userEventTrigger()方法
                         .addLast(new IdleStateHandler(0, 5, 0, TimeUnit.SECONDS))
                         .addLast(new CommonDecoder())
                         .addLast(new NettyClientHandler());
@@ -55,6 +64,7 @@ public class ChannelProvider {
         });
         Channel channel = null;
         try {
+            //建立与服务器的连接
             channel = connect(bootstrap, inetSocketAddress);
         } catch (ExecutionException e) {
             logger.error("连接客户端时有错误发生", e);
@@ -64,6 +74,9 @@ public class ChannelProvider {
         return channel;
     }
 
+    /**
+     * 客户端建立与服务端的连接
+     */
     private static Channel connect(Bootstrap bootstrap, InetSocketAddress inetSocketAddress) throws ExecutionException, InterruptedException {
         CompletableFuture<Channel> completableFuture = new CompletableFuture<>();
         bootstrap.connect(inetSocketAddress).addListener((ChannelFutureListener) future -> {
@@ -77,6 +90,9 @@ public class ChannelProvider {
         return completableFuture.get();
     }
 
+    /**
+     * 初始化Bootstrap
+     */
     private static Bootstrap initializeBootstrap() {
         eventLoopGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();

@@ -13,6 +13,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
+ * 传入一个包名，扫描包及其子包下所有的类，并将其Class对象放入一个Set中返回
+ *
  * @Auther: jchen
  * @Date: 2021/03/23/16:08
  */
